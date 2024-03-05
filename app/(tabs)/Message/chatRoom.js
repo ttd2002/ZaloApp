@@ -12,7 +12,7 @@ const chatRoom = () => {
     const navigation = useNavigation();
     const socket = io("http://192.168.56.1:8000");
     socket.on("connect", () => {
-        console.log("Connected to the Socket.IO server")
+        console.log("Connected to the Socket server")
     })
     socket.on("receiveMessage", (newMessage) => {
         console.log("reiceiver message")
