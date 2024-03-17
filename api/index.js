@@ -18,9 +18,9 @@ app.use(bodyParser.json());
 const jwt = require("jsonwebtoken");
 const User = require("./models/user");
 const Chat = require("./models/message");
-
+const phoneBookRoutes = require("./routes/phoneBookRoutes");
 mongoose
-    .connect("mongodb+srv://thanhdai912:dai110912@cluster0.4qjeg0k.mongodb.net/")
+    .connect("mongodb+srv://viet:1234@cluster0.6feymoc.mongodb.net/ZaloApp")
     .then(() => {
         console.log("Connected to MongoDB");
     })
@@ -160,3 +160,5 @@ app.get("/messages", async (req, res) => {
       res.status(500).json({ message: "Error in getting messages", error });
     }
   });
+
+app.use("/phonebook", phoneBookRoutes);
