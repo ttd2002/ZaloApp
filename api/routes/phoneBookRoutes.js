@@ -5,7 +5,7 @@ const User = require("../models/user2");
 router.get("/:userId/friends", async (req, res) => {
     try {
       const { userId } = req.params;
-  
+    //Lấy phone va name bạn bè
       const user = await User.findById(userId).populate("listFriend", ["name","phone"]);
   
       if (!user) {
