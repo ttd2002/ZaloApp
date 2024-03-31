@@ -5,7 +5,7 @@ export default function Layout() {
     <>
       <Stack>
         <Stack.Screen options={{headerShown: false}} name="index" />
-        <Stack.Screen name="chatRoom" />
+        <Stack.Screen options={{headerShown: false}} name="chatRoom" />
 
       </Stack>
     </>
