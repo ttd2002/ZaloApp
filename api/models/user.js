@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    // required: true,
   },
   
   verificationToken: String,
@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  listFriend: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ]
   
 });
 

@@ -31,7 +31,7 @@ export default function PhoneBook() {
     };
     return (
         <View style={styles.container}>
-            <View style={{ width: '100%', height: 55, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#DEB887', padding: 10 }}>
+            <View style={{ width: '100%', height: 55, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#00abf6', padding: 10 }}>
                 <TouchableOpacity style={{ width: '10%', height: '100%', alignItems: 'center', justifyContent: 'center', borderRadius: 40 }}
                     onPress={() => {
                         navigation.goBack();

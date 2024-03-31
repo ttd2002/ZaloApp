@@ -14,7 +14,7 @@ const HeaderCreateGroup = () => {
     const navigation = useNavigation();
     return (
         <View style={{height:'auto', width:'100%'}}>
-            <View style={{ width: '100%', height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#C7C8CC', padding: 20 }}>
+            <View style={{ width: '100%', height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#00abf6', padding: 20 }}>
                 <TouchableOpacity style={{ width: '8%', height: 55, alignItems: 'center', justifyContent: 'center', borderRadius: 40 }}
                     onPress={() => {
                         // router.navigate('(tabs)/PhoneBook');

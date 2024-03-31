@@ -5,17 +5,30 @@ import Icon from '@mdi/react';
 import { mdiAccountMultiple, mdiContacts } from '@mdi/js';
 import { AntDesign, Feather, FontAwesome, FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 const Friend = () => {
   const router = useRouter();
   const [friends, setFriends] = useState([]);
-  userId = "65f6fb27160e6b248a03dd1a"
+  const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = await AsyncStorage.getItem("auth");
+      const decodedToken = jwtDecode(token);
+      const userId = decodedToken.userId;
+
+      setUserId(userId);
+    };
+    fetchUser();
+  }, []);
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.165:3000/phonebook/${userId}/friends`);
+        const response = await axios.get(`http://192.168.1.31:3000/phonebook/${userId}/friends`);
         const friendInitialSort = response.data.friends.sort((a, b) => {
-          const nameA = a.name.toUpperCase();
-          const nameB = b.name.toUpperCase();
+          const nameA = a.name?.toUpperCase();
+          const nameB = b.name?.toUpperCase();
           if (nameA < nameB) {
             return -1;
           }
@@ -31,7 +44,6 @@ const Friend = () => {
       }
 
     };
-
     fetchFriends();
   }, [userId]);
   console.log(friends);

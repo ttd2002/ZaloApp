@@ -42,7 +42,8 @@
     "react-native-web": "~0.19.6",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4",
-    "expo-checkbox": "~2.7.0"
+    "expo-checkbox": "~2.7.0",
+    "react-native-webview": "13.6.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
