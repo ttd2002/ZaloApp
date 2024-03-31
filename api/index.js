@@ -86,7 +86,15 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ message: "login failed" });
     }
 });
+app.get("/getUser", async (req, res) => {
+    try {
 
+        const user = await User.find();
+        res.status(200).json({user});
+    } catch (error) {
+        res.status(500).json({ message: "failed" });
+    }
+});
 app.get("/users/:userId/messaged", async (req, res) => {
     try {
         const { userId } = req.params;
@@ -106,32 +114,65 @@ app.get("/users/:userId/messaged", async (req, res) => {
         res.status(500).json({ message: "Error retrieving the messaged", error });
     }
 });
+app.get("/users/:userId/finded", async (req, res) => {
+    try {
+        const { userId } = req.params;
 
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userFinded = user.finded;
+
+        const finded = await User.find({ _id: { $in: userFinded } });
+
+        res.status(200).json({ finded });
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving the messaged", error });
+    }
+});
 app.post("/add-messaged", async (req, res) => {
     try {
-        const { currentUserId, phone } = req.body;
-        const user = await User.findOne({ phone: phone });
+        const { currentUserId, receiverId} = req.body;
         await User.findByIdAndUpdate(currentUserId, {
-            $push: { messaged: user._id.valueOf() },
+            $push: { messaged: receiverId },
+        });
+        await User.findByIdAndUpdate(receiverId, {
+            $push: { messaged: currentUserId },
+        });
+        res.sendStatus(200);
+    } catch (error) {
+        res.status(500).json({ message: "Error add messaged", error });
+    }
+});
+app.post("/add-finded", async (req, res) => {
+    try {
+        const { currentUserId, receiverId} = req.body;
+        await User.findByIdAndUpdate(currentUserId, {
+            $push: { finded: receiverId },
         });
 
         res.sendStatus(200);
     } catch (error) {
-        res.status(500).json({ message: "Error creating a match", error });
+        res.status(500).json({ message: "Error add finded", error });
     }
 });
+var users = [];
 io.on("connection", (socket) => {
-
-   
+    socket.on("connected", (userID)=>{
+        users[userID] = socket.id;
+       
+    })
     socket.on("sendMessage", async (data) => {  
         try {
             const { senderId, receiverId, message } = data;
-
             console.log("data", data);
             const newMessage = new Chat({ senderId, receiverId, message });
             await newMessage.save();
             //emit the message to the receiver
-            io.to(receiverId).emit("receiveMessage", newMessage);
+            io.to(users[receiverId]).emit("receiveMessage", newMessage);
         } catch (error) {
             console.log("Error handling the messages");
         }

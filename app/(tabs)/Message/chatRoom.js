@@ -1,42 +1,61 @@
 import { StyleSheet, Text, View, KeyboardAvoidingView, ScrollView, TextInput, Pressable } from 'react-native'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useNavigation } from '@react-navigation/native';
-import { Entypo, Feather } from '@expo/vector-icons';
+import { Entypo, Feather, Ionicons } from '@expo/vector-icons';
 import { io } from "socket.io-client"
 import axios from 'axios';
 const chatRoom = () => {
     const [message, setMessage] = useState('')
     const [messages, setMessages] = useState([])
     const params = useLocalSearchParams();
-    const navigation = useNavigation();
+    const router = useRouter();
     const socket = io("http://192.168.56.1:8000");
     socket.on("connect", () => {
-        console.log("Connected to the Socket.IO server")
+        console.log("Connected to the Socket server")
     })
+    socket.emit("connected", params?.senderId)
     socket.on("receiveMessage", (newMessage) => {
         console.log("reiceiver message")
         console.log("new Message", newMessage)
         setMessages((prevMessages) => [...prevMessages, newMessage])
     })
+    const handleMessaged = async () => {
+        try {
+            await axios.post("http://localhost:3000/add-messaged", {
+
+                //await axios.post("http://10.0.2.2:3000/add-messaged", {
+                currentUserId: params?.senderId,
+                receiverId: params?.receiverId,
+            });
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
     const sendMessage = async (senderId, receiverId) => {
         socket.emit("sendMessage", { senderId, receiverId, message });
         setMessage("");
         setTimeout(() => {
             fetchMessages();
+            console.log(messages)
+            if (messages.length === 0) {
+                handleMessaged()
+            }
         }, 200)
-        
+
+
     }
     const fetchMessages = async () => {
         try {
             const senderId = params?.senderId;
             const receiverId = params?.receiverId;
-
             const response = await axios.get("http://localhost:3000/messages", {
+                //const response = await axios.get("http://10.0.2.2:3000/messages", {
                 params: { senderId, receiverId },
             });
 
             setMessages(response.data);
+
         } catch (error) {
             console.log("Error fetching the messages", error);
         }
@@ -48,14 +67,17 @@ const chatRoom = () => {
         const options = { hour: "numeric", minute: "numeric" };
         return new Date(time).toLocaleString("vn-VN", options);
     };
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerTitle: params?.uName,
-
-        });
-    }, []);
+    
     return (
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#e2e8f1" }}>
+            <View style={{ backgroundColor: '#00abf6', justifyContent: 'flex-start', alignItems: 'center', flexDirection: "row", alignItems: "center", gap: 10, height: 50 }}>
+                <Pressable onPress={()=>{router.replace('/Message')}}>
+                    <Ionicons name="chevron-back" size={24} color="white" />
+                </Pressable>
+                <Text style={{fontSize: 20, color: 'white'}}>{params?.uName}</Text>
+
+                
+            </View>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} >
                 {messages?.map((item, index) => (
                     <Pressable
@@ -135,7 +157,7 @@ const chatRoom = () => {
                 <Pressable
                     onPress={() => {
                         sendMessage(params?.senderId, params?.receiverId);
-                        
+
                     }}
                     style={{
                         backgroundColor: "#007bff",
