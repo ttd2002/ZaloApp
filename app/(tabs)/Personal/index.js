@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react'
 import {jwtDecode} from "jwt-decode";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import {decode} from "base-64"
+global.atob = decode;
 const index = () => {
   const [userId,setUserId] = useState("");
   const [name,setName] = useState("");
