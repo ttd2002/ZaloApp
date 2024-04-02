@@ -7,6 +7,8 @@ import { AntDesign, Feather, FontAwesome, FontAwesome5, Ionicons, MaterialCommun
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
+import { ipAddress } from '../../../config/env';
+
 const Friend = () => {
   const router = useRouter();
   const [friends, setFriends] = useState([]);
@@ -25,7 +27,7 @@ const Friend = () => {
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.31:3000/phonebook/${userId}/friends`);
+        const response = await axios.get(`http://${ipAddress}:3000/phonebook/${userId}/friends`);
         const friendInitialSort = response.data.friends.sort((a, b) => {
           const nameA = a.name?.toUpperCase();
           const nameB = b.name?.toUpperCase();
