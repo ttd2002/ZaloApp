@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = 3000;
@@ -18,9 +19,9 @@ app.use(bodyParser.json());
 const jwt = require("jsonwebtoken");
 const User = require("./models/user");
 const Chat = require("./models/message");
-
+const phoneBookRoutes = require("./routes/phoneBookRoutes");
 mongoose
-    .connect("mongodb+srv://thanhdai912:dai110912@cluster0.4qjeg0k.mongodb.net/")
+    .connect("mongodb+srv://viet:1234@cluster0.4qjeg0k.mongodb.net/test")
     .then(() => {
         console.log("Connected to MongoDB");
     })
@@ -32,6 +33,7 @@ app.listen(port, () => {
     console.log("Server is running on 3000");
 });
 
+
 app.post("/register", async (req, res) => {
     try {
         const { name, phone, password } = req.body;
@@ -41,10 +43,12 @@ app.post("/register", async (req, res) => {
             console.log("Phone already registered");
             return res.status(400).json({ message: "Phone already registered" });
         }
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const newUser = new User({
             name,
             phone,
-            password,
+            password: hashedPassword,
         });
         await newUser.save();
         res
@@ -74,9 +78,9 @@ app.post("/login", async (req, res) => {
             return res.status(401).json({ message: "Invalid phone or password" });
         }
 
-        //check in password is correct
-        if (user.password !== password) {
-            return res.status(401).json({ message: "Invalide password" });
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: "Invalid password" });
         }
 
         const token = jwt.sign({ userId: user._id, phone: user.phone, uName: user.name }, secretKey);
@@ -90,7 +94,7 @@ app.get("/getUser", async (req, res) => {
     try {
 
         const user = await User.find();
-        res.status(200).json({user});
+        res.status(200).json({ user });
     } catch (error) {
         res.status(500).json({ message: "failed" });
     }
@@ -135,7 +139,7 @@ app.get("/users/:userId/finded", async (req, res) => {
 });
 app.post("/add-messaged", async (req, res) => {
     try {
-        const { currentUserId, receiverId} = req.body;
+        const { currentUserId, receiverId } = req.body;
         await User.findByIdAndUpdate(currentUserId, {
             $push: { messaged: receiverId },
         });
@@ -149,7 +153,7 @@ app.post("/add-messaged", async (req, res) => {
 });
 app.post("/add-finded", async (req, res) => {
     try {
-        const { currentUserId, receiverId} = req.body;
+        const { currentUserId, receiverId } = req.body;
         await User.findByIdAndUpdate(currentUserId, {
             $push: { finded: receiverId },
         });
@@ -161,11 +165,11 @@ app.post("/add-finded", async (req, res) => {
 });
 var users = [];
 io.on("connection", (socket) => {
-    socket.on("connected", (userID)=>{
+    socket.on("connected", (userID) => {
         users[userID] = socket.id;
-       
+
     })
-    socket.on("sendMessage", async (data) => {  
+    socket.on("sendMessage", async (data) => {
         try {
             const { senderId, receiverId, message } = data;
             console.log("data", data);
@@ -188,16 +192,19 @@ http.listen(8000, () => {
 
 app.get("/messages", async (req, res) => {
     try {
-      const { senderId, receiverId } = req.query;
-      const messages = await Chat.find({
-        $or: [
-          { senderId: senderId, receiverId: receiverId },
-          { senderId: receiverId, receiverId: senderId },
-        ],
-      }).populate("senderId", "_id name");
-  
-      res.status(200).json(messages);
+        const { senderId, receiverId } = req.query;
+        const messages = await Chat.find({
+            $or: [
+                { senderId: senderId, receiverId: receiverId },
+                { senderId: receiverId, receiverId: senderId },
+            ],
+        }).populate("senderId", "_id name");
+
+        res.status(200).json(messages);
     } catch (error) {
-      res.status(500).json({ message: "Error in getting messages", error });
+        res.status(500).json({ message: "Error in getting messages", error });
     }
-  });
+});
+
+//routes của phone book
+app.use("/phonebook", phoneBookRoutes);
