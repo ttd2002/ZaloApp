@@ -37,7 +37,7 @@ const index = () => {
   }, []);
 
   return (
-    <View style={{ width: '100%', flex: 1, backgroundColor: 'grey' }}>
+    <View style={{ width: '100%', flex: 1 }}>
       <View style={{ backgroundColor: '#00abf6', justifyContent: 'center', alignItems: 'center', flexDirection: "row", alignItems: "center", gap: 10, height: 50 }}>
         <Pressable>
           <Ionicons name="chevron-back" size={24} color="white" />
@@ -56,7 +56,7 @@ const index = () => {
           color="white"
         />
       </View>
-      <ScrollView style={{ width: '100%', flex: 1, backgroundColor: 'grey' }}>
+      <ScrollView style={{ width: '100%', flex: 1 }}>
         <View style={{ height: 250, width: '100%', backgroundColor: 'white', alignItems: 'center', padding: 10 }}>
           <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
             <Image source={require('../../../assets/mini-app.png')} style={{ height: 30, width: 30, margin: 5, borderRadius: 40, margin: 5 }}></Image>
