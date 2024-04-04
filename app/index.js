@@ -6,8 +6,9 @@ const index = () => {
   return (
     <View>
       {/* <Redirect href="/(tabs)/Discover"/> */}
-      {/* <Redirect href="/(authenticate)/home"/> */}
-      <Redirect href="/(tabs)/Personal"/>
+      <Redirect href="/(authenticate)/home"/>
+      {/* <Redirect href="/(tabs)/Personal/eidtProfile"/> */}
+      {/* <Redirect href="/(tabs)/Personal"/> */}
     </View>
   )
 }
