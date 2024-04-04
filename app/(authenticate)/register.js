@@ -6,7 +6,9 @@ import { firebaseConfig } from './config_firebase.js';
 import firebase from 'firebase/compat/app';
 import { ipAddress } from '../../config/env.js';
 
+
 const register = () => {
+
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
@@ -56,6 +58,7 @@ const register = () => {
                 console.log("registration failed", error);
             });
     };
+    
     return (
         !verificationId ?
             <View style={styles.container}>
@@ -88,7 +91,8 @@ const register = () => {
                             alert("Vui lòng nhập đầy đủ thông tin")
                         }
                         else {
-                            sendVerification()
+                            //sendVerification()
+                            handleRegister()
                         }
                     }}
                     style={{ marginTop: 20, height: 50, width: 150, borderWidth: 1, borderColor: '#00abf6', justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}>
@@ -107,6 +111,7 @@ const register = () => {
                 <Pressable
                     onPress={() => {
                         confirmCode()
+                        setVertificationId(null)
                     }}
                     style={{ marginTop: 20, height: 50, width: 150, borderWidth: 1, borderColor: '#00abf6', justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}>
                     <Text style={{ color: 'black', fontSize: 20, fontStyle: 'normal' }}>Xác thực</Text>
