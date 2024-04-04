@@ -15,6 +15,11 @@ const home = () => {
                 style={{ height: 50, width: 150, borderWidth: 1, borderColor: '#00abf6', justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}>
                 <Text style={{ color: 'black', fontSize: 20, fontStyle: 'normal' }}>Đăng ký</Text>
             </Pressable>
+            <Pressable
+                onPress={() => { router.navigate("/forgotPassword") }}
+                style={{ height: 20, justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}>
+                <Text style={{ color: 'black', fontSize: 15, fontStyle: 'normal' }}>Quên mật khẩu?</Text>
+            </Pressable>
         </SafeAreaView>
     )
 }

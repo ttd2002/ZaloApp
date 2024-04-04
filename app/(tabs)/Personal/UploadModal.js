@@ -17,7 +17,7 @@ const UploadModal = ({ modalVisible, onBackPress, cancelable, onCameraPress, onG
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={onGalleryPress}
-                        style={{ width: '100%', height: 50, backgroundColor: '#eeeee4',alignItems: 'center', justifyContent: 'center', borderEndEndRadius: 15, borderEndStartRadius: 15 }}>
+                        style={{ width: '100%', height: 50, backgroundColor: '#eeeee4',alignItems: 'center', justifyContent: 'center', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}>
                         <Text style={{ fontSize: 20, fontStyle: 'normal' }}>Chọn từ thư viện</Text>
                     </TouchableOpacity>
                 </View>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
         padding: 10,
         elevation: 1,
         paddingHorizontal: 20,
-        marginTop: 20,
+        marginTop: 10,
         backgroundColor: '#2b83f9',
         marginLeft: 10
     },
