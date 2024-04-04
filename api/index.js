@@ -49,6 +49,9 @@ app.post("/register", async (req, res) => {
             name,
             phone,
             password: hashedPassword,
+            gender: '',
+            birthDate: '',
+            avatar: '',
         });
         await newUser.save();
         res
@@ -83,7 +86,7 @@ app.post("/login", async (req, res) => {
             return res.status(401).json({ message: "Invalid password" });
         }
 
-        const token = jwt.sign({ userId: user._id, phone: user.phone, uName: user.name }, secretKey);
+        const token = jwt.sign({ userId: user._id, phone: user.phone, uName: user.name, uGender: user.gender, uBirthDate: user.birthDate, uAvatar: user.avatar }, secretKey);
 
         res.status(200).json({ token });
     } catch (error) {
@@ -205,6 +208,49 @@ app.get("/messages", async (req, res) => {
         res.status(500).json({ message: "Error in getting messages", error });
     }
 });
+app.put("/users/:userId/editProfile", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { name, gender, birthDate } = req.body;
 
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $set: { name: name, gender: gender, birthDate: birthDate } }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res
+            .status(200)
+            .json({ message: "updated succesfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Error edit" });
+    }
+});
+
+app.put("/users/:userId/editAvatar", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { avatar} = req.body;
+        const base64Avatar = Buffer.from(avatar).toString("base64");
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $set: { avatar: avatar} }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res
+            .status(200)
+            .json({ message: "updated succesfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Error edit" });
+    }
+});
 //routes của phone book
 app.use("/phonebook", phoneBookRoutes);
