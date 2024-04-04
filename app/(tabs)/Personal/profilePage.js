@@ -1,10 +1,34 @@
 import { AntDesign, FontAwesome, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import { Image, ImageBackground, Pressable, Text, TouchableOpacity, View } from "react-native";
-
+import { jwtDecode } from "jwt-decode";
+import { decode } from "base-64"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+global.atob = decode;
 const ProfilePage = () => {
     const router = useRouter();
     const navigation = useNavigation();
+    const [userId, setUserId] = useState("");
+    const [name, setName] = useState("");
+    useEffect(() => {
+        fetchUser();
+    }, []);
+    const fetchUser = async () => {
+        try {
+            const token = await AsyncStorage.getItem("auth");
+            const decodedToken = jwtDecode(token);
+            const userId = decodedToken.userId;
+            const name = decodedToken.uName;
+
+            setUserId(userId);
+            setName(name);
+           
+            
+        } catch (error) {
+            console.error("Error fetching user data", error);
+        }
+    };
     return (
         <View style={{ flex: 1, width: '100%' }}>
             <View style={{ width: '100%', height: 350, justifyContent: 'flex-start' }}>
@@ -30,7 +54,7 @@ const ProfilePage = () => {
                     <TouchableOpacity>
                         <Image style={{ height: 130, width: 130, marginTop: 90, borderWidth: 5, borderColor: 'white', borderRadius: 100 }} source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMFC3U38jR45Fkualvk5jLmpyDt7AmijHDOA&s' }}></Image>
                     </TouchableOpacity>
-                    <Text style={{ fontSize: 23, fontWeight: '600', marginTop: 3 }}>Tran Van A</Text>
+                    <Text style={{ fontSize: 23, fontWeight: '600', marginTop: 3 }}>{name}</Text>
                     <TouchableOpacity>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
                             <FontAwesome name="pencil-square-o" size={18} color="blue" />

@@ -14,7 +14,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
-  
+  gender: {
+    type: String,
+  },
+  birthDate: {
+    type: String,
+  },
+  avatar: {
+    type: String,
+  },
   verificationToken: String,
   finded: [
     {
