@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { router } from 'expo-router'
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { ipAddress } from '../../config/env'
 const login = () => {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
@@ -11,7 +12,7 @@ const login = () => {
           phone: phone,
           password: password,
         };
-        axios.post("http://localhost:3000/login",user).then((response) => {
+        axios.post(`http://${ipAddress}:3000/login`,user).then((response) => {
 
         //axios.post("http://10.0.2.2:3000/login",user).then((response) => {
             //console.log(response);

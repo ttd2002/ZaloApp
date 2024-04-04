@@ -4,6 +4,7 @@ import axios from 'axios'
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { firebaseConfig } from './config_firebase.js';
 import firebase from 'firebase/compat/app';
+import { ipAddress } from '../../config/env.js';
 
 
 const register = () => {
@@ -43,7 +44,7 @@ const register = () => {
             password: password,
         };
         axios
-            .post("http://localhost:3000/register", user)
+            .post(`http://${ipAddress}:3000/register`, user)
             //.post("http://10.0.2.2:3000/register", user)
             .then((response) => {
                 console.log(response);
