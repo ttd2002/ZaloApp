@@ -1,4 +1,4 @@
-import { AntDesign, FontAwesome, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import { Image, ImageBackground, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { jwtDecode } from "jwt-decode";
@@ -11,6 +11,7 @@ const ProfilePage = () => {
     const navigation = useNavigation();
     const [userId, setUserId] = useState("");
     const [name, setName] = useState("");
+    const [avatar, setAvatar] = useState("");
     useEffect(() => {
         fetchUser();
     }, []);
@@ -20,10 +21,10 @@ const ProfilePage = () => {
             const decodedToken = jwtDecode(token);
             const userId = decodedToken.userId;
             const name = decodedToken.uName;
-
+            const avatar = decodedToken.uAvatar;
             setUserId(userId);
             setName(name);
-           
+            setAvatar(avatar)
             
         } catch (error) {
             console.error("Error fetching user data", error);
@@ -32,15 +33,15 @@ const ProfilePage = () => {
     return (
         <View style={{ flex: 1, width: '100%' }}>
             <View style={{ width: '100%', height: 350, justifyContent: 'flex-start' }}>
-                <ImageBackground style={{ width: '100%', height: 200, flex: 1, justifyContent: 'flex-start', alignItems: 'center' }} source={{ uri: 'https://tophinhanh.net/wp-content/uploads/2023/11/avatar-heo-cute-1.jpg' }}>
+                <ImageBackground style={{ width: '100%', height: 200, flex: 1, justifyContent: 'flex-start', alignItems: 'center' }} source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0_pw1BpBfuZAevTRIg7RFQD1NZzdrEy016w&s' }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity style={{ width: '8%', height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 40 }}
+                        {/* <TouchableOpacity style={{ width: '8%', height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 40 }}
                             onPress={() => {
-                                navigation.goBack();
+                                router.replace('/Personal') 
                             }}>
                             <AntDesign name="arrowleft" size={30} color="white" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ marginLeft: '78%', marginTop: 10 }}
+                        </TouchableOpacity> */}
+                        <TouchableOpacity style={{ marginLeft: '84%', marginTop: 10 }}
                             onPress={() => {
                                 router.navigate({
                                     pathname: '/Personal/settingPage',
@@ -52,7 +53,7 @@ const ProfilePage = () => {
 
 
                     <TouchableOpacity>
-                        <Image style={{ height: 130, width: 130, marginTop: 90, borderWidth: 5, borderColor: 'white', borderRadius: 100 }} source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMFC3U38jR45Fkualvk5jLmpyDt7AmijHDOA&s' }}></Image>
+                        <Image style={{ height: 130, width: 130, marginTop: 90, borderWidth: 5, borderColor: 'white', borderRadius: 100 }} source={{ uri: avatar? avatar :  'https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-15.jpg' }}></Image>
                     </TouchableOpacity>
                     <Text style={{ fontSize: 23, fontWeight: '600', marginTop: 3 }}>{name}</Text>
                     <TouchableOpacity>

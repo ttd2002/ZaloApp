@@ -87,7 +87,6 @@ app.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign({ userId: user._id, phone: user.phone, uName: user.name, uGender: user.gender, uBirthDate: user.birthDate, uAvatar: user.avatar }, secretKey);
-
         res.status(200).json({ token });
     } catch (error) {
         res.status(500).json({ message: "login failed" });
@@ -140,6 +139,7 @@ app.get("/users/:userId/finded", async (req, res) => {
         res.status(500).json({ message: "Error retrieving the messaged", error });
     }
 });
+
 app.post("/add-messaged", async (req, res) => {
     try {
         const { currentUserId, receiverId } = req.body;
@@ -218,13 +218,16 @@ app.put("/users/:userId/editProfile", async (req, res) => {
             { $set: { name: name, gender: gender, birthDate: birthDate } }
         );
 
+        
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+        const user2 = await User.findById(userId);
+        const token = jwt.sign({ userId: user2._id, phone: user2.phone, uName: user2.name, uGender: user2.gender, uBirthDate: user2.birthDate, uAvatar: user2.avatar }, secretKey);
 
         return res
             .status(200)
-            .json({ message: "updated succesfully", user });
+            .json({ message: "updated succesfully", token });
     } catch (error) {
         res.status(500).json({ message: "Error edit" });
     }
@@ -252,5 +255,26 @@ app.put("/users/:userId/editAvatar", async (req, res) => {
         res.status(500).json({ message: "Error edit" });
     }
 });
+app.put("/users/changePassword", async (req, res) => {
+    try {
+        const { phoneNum, newPassword } = req.body;
+        const user = await User.findOne({ phone:phoneNum });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+
+        return res.status(200).json({ message: "Password updated successfully", user });
+    } catch (error) {
+        console.error("Error changing password", error);
+        res.status(500).json({ message: "Error changing password" });
+    }
+});
+
+
 //routes của phone book
 app.use("/phonebook", phoneBookRoutes);

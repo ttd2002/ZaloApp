@@ -5,13 +5,14 @@ import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { firebaseConfig } from './config_firebase.js';
 import firebase from 'firebase/compat/app';
 import { ipAddress } from '../../config/env.js';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-const register = () => {
-
-    const [name, setName] = useState('')
+const ForgotPassword = () => {
+    const router = useRouter();
+    
     const [phone, setPhone] = useState('')
-    const [password, setPassword] = useState('')
     const [code, setCode] = useState('');
 
     const [verificationId, setVertificationId] = useState(null);
@@ -30,55 +31,25 @@ const register = () => {
     const confirmCode = () => {
         const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
         firebase.auth().signInWithCredential(credential)
-            .then(() => {
-                handleRegister()
+            .then(async () => {
+                await AsyncStorage.setItem("phone", phone);
+                router.push({
+                    pathname: '/(authenticate)/changePassword',
+                    query: { phone: phone }
+                })        
             })
             .catch((error) => {
                 alert("Xác thực thất bại")
             })
     }
-    const handleRegister = () => {
-        const user = {
-            name: name,
-            phone: phone,
-            password: password,
-        };
-        axios
-            .post(`http://${ipAddress}:3000/register`, user)
-            //.post("http://10.0.2.2:3000/register", user)
-            .then((response) => {
-                console.log(response);
-                alert("success");
-                setName("");
-                setPhone("");
-                setPassword("");
-            })
-            .catch((error) => {
-                alert("fail");
-                console.log("registration failed", error);
-            });
-    };
     
     return (
         !verificationId ?
             <View style={styles.container}>
                 <TextInput
-                    value={name}
-                    onChangeText={(txt) => setName(txt)}
-                    placeholder='Tên'
-                    style={{ width: '100%', height: 50, padding: 15, borderBottomWidth: 1, borderBottomColor: 'grey' }}
-                />
-                <TextInput
                     value={phone}
                     onChangeText={(txt) => setPhone(txt)}
                     placeholder='Số điện thoại'
-                    style={{ width: '100%', height: 50, padding: 15, borderBottomWidth: 1, borderBottomColor: 'grey' }}
-                />
-                <TextInput
-                    value={password}
-                    onChangeText={(txt) => setPassword(txt)}
-                    placeholder='Mật khẩu'
-                    secureTextEntry
                     style={{ width: '100%', height: 50, padding: 15, borderBottomWidth: 1, borderBottomColor: 'grey' }}
                 />
                 <FirebaseRecaptchaVerifierModal
@@ -87,16 +58,19 @@ const register = () => {
                 />
                 <Pressable
                     onPress={() => {
-                        if (phone === '' || name === '' || password === '') {
+                        if (phone === '') {
                             alert("Vui lòng nhập đầy đủ thông tin")
                         }
                         else {
-                            sendVerification()
-                            // handleRegister()
+                            // sendVerification()
+                            router.navigate({
+                                pathname: '/(authenticate)/changePassword',
+                                query: { phone: phone }
+                            })
                         }
                     }}
                     style={{ marginTop: 20, height: 50, width: 150, borderWidth: 1, borderColor: '#00abf6', justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}>
-                    <Text style={{ color: 'black', fontSize: 20, fontStyle: 'normal' }}>Đăng ký</Text>
+                    <Text style={{ color: 'black', fontSize: 20, fontStyle: 'normal' }}>Tìm kiếm</Text>
                 </Pressable>
             </View>
             :
@@ -121,7 +95,7 @@ const register = () => {
     )
 }
 
-export default register
+export default ForgotPassword
 
 const styles = StyleSheet.create({
     container: {
