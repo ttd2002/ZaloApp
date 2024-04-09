@@ -9,6 +9,7 @@ import { mdiAccountGroupOutline, mdiArrowLeft } from '@mdi/js';
 import { useRouter } from 'expo-router';
 import { AntDesign, Entypo, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Stack } from "expo-router";
+import { createStackNavigator } from '@react-navigation/native-stack';
 const CreateGroup = () => {
     <>
         <GetPhoneBookOrRecently />

@@ -11,7 +11,6 @@ const Search = () => {
 
     const textInputRef = useRef(null);
 
-
     useEffect(() => {
         textInputRef.current.focus();
     }, []);

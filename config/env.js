@@ -1,2 +1,4 @@
-export const ipAddress = '192.168.33.98';
+// export const ipAddress = '192.168.1.2';
 // export const ipAddress = 'localhost';
+const ipAddress = '192.168.1.2';
+module.exports = { ipAddress };
