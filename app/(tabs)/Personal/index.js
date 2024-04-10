@@ -3,9 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useRouter } from 'expo-router';
-import { decode } from "base-64"
 import { AntDesign, Entypo, EvilIcons, Feather, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-global.atob = decode;
+
 const index = () => {
   const router = useRouter();
   const [userId, setUserId] = useState("");

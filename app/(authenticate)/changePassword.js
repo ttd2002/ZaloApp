@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { View, TextInput, Pressable, Text, StyleSheet } from 'react-native';
 import { ipAddress } from '../../config/env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { NavigationContainer } from '@react-navigation/native';
 const ChangePassword = () => {
     const router = useRouter();
     const route = useRoute ();

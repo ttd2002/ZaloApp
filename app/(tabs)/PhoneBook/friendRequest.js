@@ -9,9 +9,9 @@ import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 export default function FriendRequest() {
     const Stack = createNativeStackNavigator();
     return (
-        <>
+        <View>
             <GetPhoneBookOrRecently/>
-        </>
+        </View>
     );
 }
 

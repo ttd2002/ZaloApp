@@ -11,7 +11,7 @@ const cors = require("cors");
 
 const http = require('http').createServer(app);
 const io = require("socket.io")(http)
-app.use(cors());
+app.use(cors({origin: true, credentials: true}));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -20,8 +20,9 @@ const jwt = require("jsonwebtoken");
 const User = require("./models/user");
 const Chat = require("./models/message");
 const phoneBookRoutes = require("./routes/phoneBookRoutes");
+const { ipAddress } = require("../config/env");
 mongoose
-    .connect("mongodb+srv://viet:1234@cluster0.4qjeg0k.mongodb.net/test")
+    .connect("mongodb+srv://thanhdai912:dai110912@cluster0.4qjeg0k.mongodb.net/test")
     .then(() => {
         console.log("Connected to MongoDB");
     })

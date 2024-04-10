@@ -7,20 +7,21 @@ import { ipAddress } from '../../config/env'
 const login = () => {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
-    const handleLogin = () => {
+    const handleLogin = async () => {
         const user = {
           phone: phone,
           password: password,
         };
-        axios.post(`http://${ipAddress}:3000/login`,user).then((response) => {
-
-        //axios.post("http://10.0.2.2:3000/login",user).then((response) => {
-            //console.log(response);
-            const token = response.data.token;
-            AsyncStorage.setItem("auth",token);
-            router.replace("/(tabs)/Message")
-        })
+        try {
+          const response = await axios.post(`http://${ipAddress}:3000/login`, user);
+          const token = response.data.token;
+          AsyncStorage.setItem("auth", token);
+          router.replace("/(tabs)/Message");
+        } catch (error) {
+          console.error("Error:", error);
+        }
       };
+      
     return (
         <SafeAreaView style={styles.container}>
             <TextInput

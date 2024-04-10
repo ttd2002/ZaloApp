@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Pressable, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios"
+import { ipAddress } from "../config/env";
 
 const UserChat = ({ item, userId }) => {
     const router = useRouter();
@@ -21,7 +22,7 @@ const UserChat = ({ item, userId }) => {
         try {
             const senderId = userId;
             const receiverId = item?._id;
-            const response = await axios.get("http://localhost:3000/messages", {
+            const response = await axios.get(`http://${ipAddress}:3000/messages`, {
 
             //const response = await axios.get("http://10.0.2.2:3000/messages", {
                 params: { senderId, receiverId },

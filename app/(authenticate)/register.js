@@ -5,6 +5,7 @@ import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { firebaseConfig } from './config_firebase.js';
 import firebase from 'firebase/compat/app';
 import { ipAddress } from '../../config/env.js';
+import { router, useRouter } from 'expo-router'
 
 
 const register = () => {
@@ -13,7 +14,7 @@ const register = () => {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [code, setCode] = useState('');
-
+    const router = useRouter();
     const [verificationId, setVertificationId] = useState(null);
     const recaptchaVerifier = useRef(null);
 

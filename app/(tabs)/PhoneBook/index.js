@@ -14,36 +14,11 @@ const index = () => {
   const [selectedTab, setSelectedTab] = useState('Bạn bè');
   return (
     <View style={{ flex: 1 }}>
-      {/* <Tab.Navigator
-        initialRouteName="Bạn bè"
-        tabBarOptions={{
-          labelStyle: { fontSize: 15, fontWeight: '700' },
-          activeTintColor: 'blue',
-          inactiveTintColor: 'gray',
-        }}
-        tabBar={(props) => (
-          <View style={{ flexDirection: 'row' }}>
-            {props.state.routes.map((route, index) => (
-              <TouchableOpacity
-                key={index}
-                style={{ flex: 1, alignItems: 'center', paddingVertical: 10, height: 40, borderBottom: selectedTab === route.name ? '2px solid black' : '' }}
-                onPress={() => {
-                  setSelectedTab(route.name);
-                  props.navigation.navigate(route.name);
-                }}
-              >
-                <Text style={{ color: selectedTab === route.name ? 'blue' : 'gray', }}>{route.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      > */}
       <Tab.Navigator initialLayout={"Bạn bè"}>
         <Tab.Screen name="Bạn bè" component={Friend} />
         <Tab.Screen name="Nhóm" component={Group} />
       </Tab.Navigator>
     </View>
-    // </View>
   )
 }
 
