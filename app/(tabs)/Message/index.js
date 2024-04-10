@@ -7,6 +7,7 @@ import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import axios from 'axios';
 import UserChat from '../../../components/userChat';
 import { decode } from "base-64"
+import { ipAddress } from '../../../config/env';
 global.atob = decode;
 const index = () => {
   const router = useRouter();
@@ -34,7 +35,7 @@ const index = () => {
   const fetchUserMessaged = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/users/${userId}/messaged`
+        `http://${ipAddress}:3000/users/${userId}/messaged`
 
         //`http://10.0.2.2:3000/users/${userId}/messaged`
       );
@@ -48,7 +49,7 @@ const index = () => {
   const fetchUserFinded = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/users/${userId}/finded`
+        `http://${ipAddress}:3000/users/${userId}/finded`
 
         //`http://10.0.2.2:3000/users/${userId}/messaged`
       );
@@ -62,7 +63,7 @@ const index = () => {
   const fetchGetUser = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/getUser"
+        `http://${ipAddress}:3000/getUser`
       );
 
       const user = response.data.user;
@@ -90,7 +91,7 @@ const index = () => {
   };
   const handleFinded = async (receiver) => {
     try {
-        await axios.post("http://localhost:3000/add-finded", {
+        await axios.post(`http://${ipAddress}:3000/add-finded`, {
 
             //await axios.post("http://10.0.2.2:3000/add-finded", {
             currentUserId: userId,

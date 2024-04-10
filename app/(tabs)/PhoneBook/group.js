@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const Group = () => {
-
     const router = useRouter();
+
     return (
         <View style={styles.container}>
             <TouchableOpacity style={{ width: '100%', height: 'auto', backgroundColor: 'white', padding: 15 }}
@@ -28,10 +28,10 @@ const Group = () => {
             <View style={{ width: '100%', height: 'auto', backgroundColor: 'white', padding: 15, marginTop: 4 }}>
                 <View style={{ flexDirection: 'row', alignContent: 'space-between', width: '100%', alignItems: 'center', gap: 18 }}>
                     <View style={{ width: '65%' }}>
-                        <Text style={{ fontWeight: '350', fontSize: 15 }}>Nhóm đang tham gia ()</Text>
+                        <Text style={{ fontWeight: '400', fontSize: 15 }}>Nhóm đang tham gia ()</Text>
                     </View>
                     <View style={{ width: '35%' }}>
-                        <Text style={{ fontWeight: '350', fontSize: 15 }}>Hoạt động cuối</Text>
+                        <Text style={{ fontWeight: '400', fontSize: 15 }}>Hoạt động cuối</Text>
                     </View>
                 </View>
 

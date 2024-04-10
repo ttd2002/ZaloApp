@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Pressable, TouchableOpacity, Image, TextInput, 
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useRouter } from 'expo-router';
-import { FontAwesome6, FontAwesome5, AntDesign, Fontisto, Entypo, EvilIcons, Feather, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome6, FontAwesome5, AntDesign, Fontisto, EvilIcons, Feather, Ionicons, MaterialCommunityIcons, MaterialIcons, Entypo } from '@expo/vector-icons';
 import ImageModal from 'react-native-image-modal';
 import { ImageGallerySwiper } from 'react-native-image-gallery-swiper';
 import { jwtDecode } from "jwt-decode";
@@ -20,7 +20,6 @@ const index = () => {
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
 
 
   const [isLiked, setIsLiked] = useState(false);
@@ -84,18 +83,24 @@ const index = () => {
       content: 'cdv d hdh  dh gf jhTinh thần thơ mới là một nội dung nổi bật được Hoài Thanh nói lên thật sâu sắc trong phần cuối bài tiểu luận Một thời đại trong thi ca.Sau khi chỉ ra hình dáng câu thơ, nhạc điệu câu thơ, sự mềm mại, chỗ ngắt hơi, phép dùng chữ, phép đặt...',
       images: [
         {
+          // Không có id bị báo warning, lúc thêm dùng images.length + 1 để gán vào id
+          id:1,
           url: 'https://source.unsplash.com/random?sig=1',
         },
         {
+          id:2,
           url: 'https://source.unsplash.com/random?sig=2',
         },
         {
+          id:3,
           url: 'https://source.unsplash.com/random?sig=3',
         },
         {
+          id:4,
           url: 'https://source.unsplash.com/random?sig=4',
         },
         {
+          id:5,
           url: 'https://source.unsplash.com/random?sig=5',
         },
       ],
@@ -131,21 +136,27 @@ const index = () => {
       content: '',
       images: [
         {
+          id:1,
           url: 'https://source.unsplash.com/random?sig=1',
         },
         {
+          id:2,
           url: 'https://source.unsplash.com/random?sig=2',
         },
         {
+          id:3,
           url: 'https://source.unsplash.com/random?sig=3',
         },
         {
+          id:4,
           url: 'https://source.unsplash.com/random?sig=4',
         },
         {
+          id:5,
           url: 'https://source.unsplash.com/random?sig=5',
         },
         {
+          id:6,
           url: 'https://source.unsplash.com/random?sig=6',
         },
       ],
@@ -433,6 +444,7 @@ const index = () => {
                   }}
                 >
                   <Fontisto name="comment" size={24} color="black" />
+
                 </TouchableOpacity>
                 {item.numberOfComments > 0 ? <Text style={{ justifyContent: 'center', fontSize: 18 }}>{item.numberOfComments} bình luận</Text> : <></>}
               </View>

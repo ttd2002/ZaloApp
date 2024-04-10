@@ -118,7 +118,7 @@ const Friend = () => {
 
 
         <View style={{ width: '100%' }}>
-          {friends.length > 0 ? (
+          {friends?.length > 0 ? (
             friends.map((group, index) => (
               <View key={index} style={{ backgroundColor: 'white', padding: 10 }}>
                 <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{group[0].name.charAt(0).toUpperCase()}</Text>
@@ -126,7 +126,7 @@ const Friend = () => {
                   <View key={subIndex} style={{ width: '100%', height: 'auto', backgroundColor: 'white', padding: 15, marginTop: 2 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                       <Image style={{ width: 50, height: 50, borderRadius: 60, borderWidth: 2, borderColor: 'black' }} source={require('../../../assets/icon.png')} />
-                      <Text style={{ fontWeight: '450', fontSize: 18, marginLeft: 10, width: '50%' }}>{item.name}</Text>
+                      <Text style={{ fontWeight: '500', fontSize: 18, marginLeft: 10, width: '50%' }}>{item.name}</Text>
                       <Ionicons name="call-outline" size={26} color="black" />
                       <Feather name="video" size={24} color="black" />
                     </View>

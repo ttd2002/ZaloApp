@@ -37,7 +37,7 @@ export default function PhoneBook() {
                         navigation.goBack();
                     }}>
                     <AntDesign name="arrowleft" size={24} height={24} color="black" />
-
+                    
                 </TouchableOpacity>
                 <View style={{ height: 'auto', width: '90%' }}>
                     <Text style={{ fontWeight: '600', fontSize: 18 }}>Danh bạ máy</Text>
@@ -80,7 +80,6 @@ export default function PhoneBook() {
                 </View>
 
 
-
                 {/* <View style={{ width: '100%', height: 'auto', backgroundColor: 'white', padding: 15 }}>
                     <Text>A</Text>
                     <View style={{ flexDirection: 'row', alignContent: 'space-between', width: '100%', height: 60, alignItems: 'center', gap: 18 }}>
@@ -103,6 +102,7 @@ export default function PhoneBook() {
                                         alignItems: 'center',
                                     }}>
                                     <Text style={{ color: 'white' }}>{contact.name[0]}</Text>
+                                    
                                 </View>
                             <Text style={{ marginLeft: 10 }}>{contact.name}</Text>
                         </View>

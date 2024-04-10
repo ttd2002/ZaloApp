@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Entypo, Feather, Ionicons } from '@expo/vector-icons';
 import { io } from "socket.io-client"
 import axios from 'axios';
+import { ipAddress } from '../../../config/env';
 const chatRoom = () => {
     const [message, setMessage] = useState('')
     const [messages, setMessages] = useState([])
@@ -22,7 +23,7 @@ const chatRoom = () => {
     })
     const handleMessaged = async () => {
         try {
-            await axios.post("http://localhost:3000/add-messaged", {
+            await axios.post(`http://${ipAddress}:3000/add-messaged`, {
 
                 //await axios.post("http://10.0.2.2:3000/add-messaged", {
                 currentUserId: params?.senderId,
@@ -49,7 +50,7 @@ const chatRoom = () => {
         try {
             const senderId = params?.senderId;
             const receiverId = params?.receiverId;
-            const response = await axios.get("http://localhost:3000/messages", {
+            const response = await axios.get(`http://${ipAddress}:3000/messages`, {
                 //const response = await axios.get("http://10.0.2.2:3000/messages", {
                 params: { senderId, receiverId },
             });
