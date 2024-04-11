@@ -191,7 +191,7 @@ io.on("connection", (socket) => {
     socket.on("sendMessage", async (data) => {
         try {
             const { senderId, receiverId, message, type } = data;
-            console.log("data", data); let contentMessage = message;
+            console.log("data", data);
             /* if (type === "image") {
                 const imagePath = path.resolve(message.replace('file://', ''));
                 const imageContent = fs.readFileSync(imagePath);
@@ -206,7 +206,7 @@ io.on("connection", (socket) => {
                 const uploadedImage = await s3.upload(params).promise();
                 contentMessage = uploadedImage.Location;
             } */
-            const newMessage = new Chat({ senderId, receiverId, message: contentMessage, type });
+            const newMessage = new Chat({ senderId, receiverId, message, type });
             await newMessage.save();
             //emit the message to the receiver
             io.to(users[receiverId]).emit("receiveMessage", newMessage);

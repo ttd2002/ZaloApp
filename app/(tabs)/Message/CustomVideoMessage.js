@@ -13,7 +13,7 @@ const CustomVideoMessage = ({ currentMessage }) => {
     } else {
       return (
         <Video
-          source={{ uri: currentMessage.video }}
+          source={{ uri: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" }}
           style={{ width: 200, height: 200 }}
           resizeMode="contain"
           controls

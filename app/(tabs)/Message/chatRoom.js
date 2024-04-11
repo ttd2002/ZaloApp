@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Text, View, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +12,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Audio } from 'expo-av';
 import CustomVideoMessage from './CustomVideoMessage';
 import * as DocumentPicker from 'expo-document-picker';
-import { Video } from 'react-native-video';
+import { Video } from 'expo-av';
+
 import CustomDocumentMessage from './CustomDocumentMessage';
 const chatRoom = () => {
     const [recording, setRecording] = useState();
@@ -25,6 +26,8 @@ const chatRoom = () => {
     const params = useLocalSearchParams();
     const router = useRouter();
     const socket = io(`http://${ipAddress}:8000`);
+
+    const video = useRef(null)
     socket.on("connect", () => {
         console.log("Connected to the Socket server")
     })
@@ -145,7 +148,7 @@ const chatRoom = () => {
             const response = await axios.get(`http://${ipAddress}:3000/messages`, {
                 params: { senderId, receiverId },
             });
-            return response.data.length === 0;
+            return response.data.length === 1;
         } catch (error) {
             console.log("Error fetching the messages", error);
             return false;
@@ -156,42 +159,32 @@ const chatRoom = () => {
         if (type === "image") {
             const message = messages.image;
             socket.emit("sendMessage", { senderId, receiverId, message, type });
-            const hasNoMessages = await checkFirstMessage();
-            if (hasNoMessages) {
-                handleMessaged();
-            }
+
         }
         if (type === "video") {
             const message = messages.video;
             socket.emit("sendMessage", { senderId, receiverId, message, type });
-            const hasNoMessages = await checkFirstMessage();
-            if (hasNoMessages) {
-                handleMessaged();
-            }
+
         }
         if (type === "voice") {
+            console.log("test audio", messages.audio)
             const message = messages.audio;
-            socket.emit("sendVoiceMessage", { senderId, receiverId, message, type });
-            const hasNoMessages = await checkFirstMessage();
-            if (hasNoMessages) {
-                handleMessaged();
-            }
+            socket.emit("sendMessage", { senderId, receiverId, message: messages.audio, type });
+
         }
         if (type === "file") {
-            const message = messages.document;
+            const message = messages.document.assets[0].uri;
             socket.emit("sendMessage", { senderId, receiverId, message, type });
-            const hasNoMessages = await checkFirstMessage();
-            if (hasNoMessages) {
-                handleMessaged();
-            }
+
         }
         else {
             const message = messages.length > 0 ? messages[messages.length - 1].text : null;
             socket.emit("sendMessage", { senderId, receiverId, message, type });
-            const hasNoMessages = await checkFirstMessage();
-            if (hasNoMessages) {
-                handleMessaged();
-            }
+
+        }
+        const hasNoMessages = await checkFirstMessage();
+        if (hasNoMessages) {
+            handleMessaged();
         }
     }, []);
     const uploadImage = async (mode) => {
@@ -304,25 +297,33 @@ const chatRoom = () => {
         const seconds = Math.round((minutes - Math.floor(minutes)) * 60);
         return seconds < 10 ? `${Math.floor(minutes)}:0${seconds}` : `${Math.floor(minutes)}:${seconds}`
     }
-    const pickDocument = async () => {
+    const playAudio = async (audioUri) => {
         try {
-            const result = await DocumentPicker.getDocumentAsync({ type: '*/*' });
-            if (result.type === 'success') {
-                console.log("OK")
-                const messages = {
-                    _id: Math.random().toString(36).substring(9),
-                    document: result.uri,
-                    createdAt: new Date(),
-                    user: {
-                        _id: params?.receiverId,
-                    },
-                };
-                onSend(messages, params?.senderId, params?.receiverId, "file");
-            }
+            const soundObject = new Audio.Sound();
+            await soundObject.loadAsync({ uri: audioUri });
+            await soundObject.playAsync();
         } catch (error) {
-            console.log('Error picking document: ', error);
+            console.error('Error playing audio: ', error);
         }
     };
+    const handleDocumentSelection = useCallback(async () => {
+        try {
+            const response = await DocumentPicker.getDocumentAsync({
+                presentationStyle: 'fullScreen',
+            });
+            const messages = {
+                _id: Math.random().toString(36).substring(9),
+                document: response,
+                createdAt: new Date(),
+                user: {
+                    _id: params?.receiverId,
+                },
+            };
+            onSend(messages, params?.senderId, params?.receiverId, "file");
+        } catch (err) {
+            console.warn(err);
+        }
+    }, []);
     return (
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#e2e8f1" }}>
             <View style={{ backgroundColor: '#00abf6', justifyContent: 'flex-start', alignItems: 'center', flexDirection: "row", alignItems: "center", gap: 10, height: 50 }}>
@@ -351,10 +352,10 @@ const chatRoom = () => {
                                 <TouchableOpacity onPress={pickVideo}>
                                     <Entypo name='folder-video' size={28} />
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={uploadImage}>
+                                <TouchableOpacity onPress={() => { uploadImage("gallery") }}>
                                     <Ionicons name='image-outline' size={28} />
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={pickDocument}>
+                                <TouchableOpacity onPress={handleDocumentSelection}>
                                     <Ionicons name='document-attach' size={28} />
                                 </TouchableOpacity>
                             </>
@@ -363,12 +364,22 @@ const chatRoom = () => {
                 )}
                 renderMessageAudio={(props) => (
                     <View style={{ flexDirection: 'row', alignItems: 'center', width: 50 }}>
-                        <TouchableOpacity onPress={() => voice.sound.replayAsync()}>
+                        <TouchableOpacity onPress={() => { playAudio(props.currentMessage.audio) }}>
                             <AntDesign style={{ padding: 15 }} name='play' size={28} />
                         </TouchableOpacity>
                     </View>
                 )}
-                //renderMessageVideo={(props) => <CustomVideoMessage {...props} />}
+                renderMessageVideo={(props) => (
+                    <>
+                        <Video
+                            source={{ uri: props.currentMessage.video }}
+                            style={{ width: 200, height: 200 }}
+                            resizeMode="contain"
+                            useNativeControls={true}
+                        />
+                    </>
+                )}
+
             />
         </KeyboardAvoidingView>
     );
