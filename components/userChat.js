@@ -9,22 +9,42 @@ const UserChat = ({ item, userId }) => {
     const [messages, setMessages] = useState([]);
     const getLastMessage = () => {
         const n = messages.length;
-
-
         return messages[n - 1];
+    }
+    const getContentMessage = () => {
+        let messageContent;
+        switch (lastMessage.type) {
+            case "text":
+                messageContent = lastMessage.message;
+                break;
+            case "image":
+                messageContent = "[Hình ảnh]";
+                break;
+            case "video":
+                messageContent = "[Video]";
+                break;
+            case "voice":
+                messageContent = "[Tin nhắn thoại]";
+                break;
+            case "file":
+                messageContent = "[Tài liệu]";
+                break;
+            default:
+                messageContent = lastMessage.message;
+        }
+        return messageContent;
     }
     const lastMessage = getLastMessage();
     useEffect(() => {
         fetchMessages();
     }, []);
-
     const fetchMessages = async () => {
         try {
             const senderId = userId;
             const receiverId = item?._id;
             const response = await axios.get(`http://${ipAddress}:3000/messages`, {
 
-            //const response = await axios.get("http://10.0.2.2:3000/messages", {
+                //const response = await axios.get("http://10.0.2.2:3000/messages", {
                 params: { senderId, receiverId },
             });
 
@@ -37,10 +57,10 @@ const UserChat = ({ item, userId }) => {
         <Pressable
             onPress={() => {
                 router.navigate({
-                    
+
                     pathname: '/Message/chatRoom',
                     params: {
-                        
+
                         uName: item.name,
                         senderId: userId,
                         receiverId: item._id,
@@ -59,7 +79,7 @@ const UserChat = ({ item, userId }) => {
                 <View style={{ gap: 10 }}>
                     <Text style={{ fontSize: 20, fontStyle: 'normal', alignItems: 'flex-start' }}>{item.name}</Text>
                     <Text style={{ fontSize: 10, color: 'grey', alignItems: 'flex-start' }}>
-                        {lastMessage ? lastMessage?.message : 'Không có tin nhắn'}
+                        {lastMessage ? getContentMessage() : '[Hình ảnh]'}
                     </Text>
                 </View>
             </View>

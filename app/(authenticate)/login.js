@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, TextInput, Pressable } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, TextInput, Pressable, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { router } from 'expo-router'
 import axios from 'axios'
@@ -37,11 +37,11 @@ const login = () => {
                 secureTextEntry
                 style={{ width: '100%', height: 50, padding: 15, borderBottomWidth: 1, borderBottomColor: 'grey' }}
             />
-            <Pressable
+            <TouchableOpacity
                 onPress={handleLogin}
                 style={{ height: 50, width: 150, backgroundColor: '#00abf6', justifyContent: 'center', alignItems: 'center', borderRadius: 20, marginTop: 20 }}>
                 <Text style={{ color: 'white', fontSize: 20, fontStyle: 'normal' }}>Đăng nhập</Text>
-            </Pressable>
+            </TouchableOpacity>
         </SafeAreaView>
     )
 }

@@ -8,8 +8,13 @@ import axios from 'axios';
 import UserChat from '../../../components/userChat';
 import { decode } from "base-64"
 import { ipAddress } from '../../../config/env';
+import { io } from "socket.io-client"
 global.atob = decode;
 const index = () => {
+  const socket = io("http://192.168.56.1:8000");
+  socket.on("Render", () => {
+    fetchUserMessaged();
+  })
   const router = useRouter();
   const [userId, setUserId] = useState("");
   const [userPhone, setUserPhone] = useState("");

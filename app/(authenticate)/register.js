@@ -92,8 +92,8 @@ const register = () => {
                             alert("Vui lòng nhập đầy đủ thông tin")
                         }
                         else {
-                            sendVerification()
-                            // handleRegister()
+                            // sendVerification()
+                            handleRegister()
                         }
                     }}
                     style={{ marginTop: 20, height: 50, width: 150, borderWidth: 1, borderColor: '#00abf6', justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}>

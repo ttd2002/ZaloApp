@@ -8,10 +8,26 @@ const bcrypt = require('bcrypt');
 const app = express();
 const port = 3000;
 const cors = require("cors");
+const multer = require("multer");
+const AWS = require("aws-sdk");
+require("dotenv").config();
+const path = require("path");
+const fs = require('fs');
+
+process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
+
+AWS.config.update({
+    region: process.env.REGION,
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+});
+const s3 = new AWS.S3()
+const bucketName = process.env.S3_BUCKET_NAME;
+
 
 const http = require('http').createServer(app);
 const io = require("socket.io")(http)
-app.use(cors({origin: true, credentials: true}));
+app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -20,9 +36,8 @@ const jwt = require("jsonwebtoken");
 const User = require("./models/user");
 const Chat = require("./models/message");
 const phoneBookRoutes = require("./routes/phoneBookRoutes");
-const { ipAddress } = require("../config/env");
 mongoose
-    .connect("mongodb+srv://thanhdai912:dai110912@cluster0.4qjeg0k.mongodb.net/test")
+    .connect("mongodb+srv://thanhdai912:dai110912@cluster0.4qjeg0k.mongodb.net/")
     .then(() => {
         console.log("Connected to MongoDB");
     })
@@ -50,9 +65,6 @@ app.post("/register", async (req, res) => {
             name,
             phone,
             password: hashedPassword,
-            gender: '',
-            birthDate: '',
-            avatar: '',
         });
         await newUser.save();
         res
@@ -173,21 +185,40 @@ io.on("connection", (socket) => {
         users[userID] = socket.id;
 
     })
+    socket.on("requestRender", () => {
+        io.emit("Render")
+    })
     socket.on("sendMessage", async (data) => {
         try {
-            const { senderId, receiverId, message } = data;
-            console.log("data", data);
-            const newMessage = new Chat({ senderId, receiverId, message });
+            const { senderId, receiverId, message, type } = data;
+            console.log("data", data); let contentMessage = message;
+            /* if (type === "image") {
+                const imagePath = path.resolve(message.replace('file://', ''));
+                const imageContent = fs.readFileSync(imagePath);
+                console.log("test: ", imageContent)
+                const filePath = `${senderId}_${Date.now().toString()}.jpg`;
+                const params = {
+                    Bucket: bucketName,
+                    Key: filePath,
+                    Body: imageContent,
+                    ACL: 'public-read'
+                };
+                const uploadedImage = await s3.upload(params).promise();
+                contentMessage = uploadedImage.Location;
+            } */
+            const newMessage = new Chat({ senderId, receiverId, message: contentMessage, type });
             await newMessage.save();
             //emit the message to the receiver
             io.to(users[receiverId]).emit("receiveMessage", newMessage);
         } catch (error) {
-            console.log("Error handling the messages");
+            console.log("Error handling the messages:", error); // In ra lỗi nếu có
         }
-        socket.on("disconnet", () => {
-            console.log("user disconnected");
-        });
     });
+
+    socket.on("disconnet", () => {
+        console.log("user disconnected");
+    });
+
 });
 
 http.listen(8000, () => {
@@ -219,7 +250,7 @@ app.put("/users/:userId/editProfile", async (req, res) => {
             { $set: { name: name, gender: gender, birthDate: birthDate } }
         );
 
-        
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -237,12 +268,12 @@ app.put("/users/:userId/editProfile", async (req, res) => {
 app.put("/users/:userId/editAvatar", async (req, res) => {
     try {
         const { userId } = req.params;
-        const { avatar} = req.body;
+        const { avatar } = req.body;
         const base64Avatar = Buffer.from(avatar).toString("base64");
 
         const user = await User.findByIdAndUpdate(
             userId,
-            { $set: { avatar: avatar} }
+            { $set: { avatar: avatar } }
         );
 
         if (!user) {
@@ -259,7 +290,7 @@ app.put("/users/:userId/editAvatar", async (req, res) => {
 app.put("/users/changePassword", async (req, res) => {
     try {
         const { phoneNum, newPassword } = req.body;
-        const user = await User.findOne({ phone:phoneNum });
+        const user = await User.findOne({ phone: phoneNum });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });

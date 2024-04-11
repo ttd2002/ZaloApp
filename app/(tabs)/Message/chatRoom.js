@@ -1,61 +1,135 @@
-import { StyleSheet, Text, View, KeyboardAvoidingView, ScrollView, TextInput, Pressable } from 'react-native'
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useEffect, useState } from 'react';
+import { Text, View, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
-import { Entypo, Feather, Ionicons } from '@expo/vector-icons';
-import { io } from "socket.io-client"
+import { Ionicons, Entypo, AntDesign } from '@expo/vector-icons';
+import { io } from 'socket.io-client';
 import axios from 'axios';
 import { ipAddress } from '../../../config/env';
+import { GiftedChat, Send } from 'react-native-gifted-chat';
+import * as VideoPicker from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
+import CustomVideoMessage from './CustomVideoMessage';
+import * as DocumentPicker from 'expo-document-picker';
+import { Video } from 'react-native-video';
+import CustomDocumentMessage from './CustomDocumentMessage';
 const chatRoom = () => {
-    const [message, setMessage] = useState('')
+    const [recording, setRecording] = useState();
+    const [voice, setVoice] = useState();
+
+    const navigation = useNavigation();
     const [messages, setMessages] = useState([])
+    const [text, setText] = useState('')
+
     const params = useLocalSearchParams();
     const router = useRouter();
-    const socket = io("http://192.168.56.1:8000");
+    const socket = io(`http://${ipAddress}:8000`);
     socket.on("connect", () => {
         console.log("Connected to the Socket server")
     })
     socket.emit("connected", params?.senderId)
     socket.on("receiveMessage", (newMessage) => {
-        console.log("reiceiver message")
         console.log("new Message", newMessage)
-        setMessages((prevMessages) => [...prevMessages, newMessage])
+        let messageContent;
+        switch (newMessage.type) {
+            case "text":
+                messageContent = { text: newMessage.message };
+                break;
+            case "image":
+                messageContent = { image: newMessage.message };
+                break;
+            case "video":
+                messageContent = { video: newMessage.message };
+                break;
+            case "voice":
+                messageContent = { audio: newMessage.message };
+                break;
+            case "file":
+                messageContent = { document: newMessage.message };
+                break;
+            default:
+                messageContent = { text: newMessage.message };
+        }
+
+
+        const newMess = {
+            _id: newMessage._id,
+            createdAt: newMessage.timestamp,
+            user: {
+                _id: newMessage.receiverId,
+            },
+            ...messageContent,
+        }
+        setMessages(previousMessages => GiftedChat.append(previousMessages, newMess));
     })
     const handleMessaged = async () => {
         try {
             await axios.post(`http://${ipAddress}:3000/add-messaged`, {
-
-                //await axios.post("http://10.0.2.2:3000/add-messaged", {
                 currentUserId: params?.senderId,
                 receiverId: params?.receiverId,
             });
+            socket.emit("requestRender")
         } catch (error) {
             console.log("error", error);
         }
     };
-    const sendMessage = async (senderId, receiverId) => {
-        socket.emit("sendMessage", { senderId, receiverId, message });
-        setMessage("");
-        setTimeout(() => {
-            fetchMessages();
-            console.log(messages)
-            if (messages.length === 0) {
-                handleMessaged()
+
+    useEffect(() => {
+        navigation.getParent()?.setOptions({
+            tabBarStyle: {
+                display: 'none'
             }
-        }, 200)
+        });
+        return () => {
+            navigation.getParent()?.setOptions({
+                tabBarStyle: {
+                    display: 'flex'
+                }
+            });
+        }
+    }, [])
 
-
-    }
     const fetchMessages = async () => {
         try {
             const senderId = params?.senderId;
             const receiverId = params?.receiverId;
             const response = await axios.get(`http://${ipAddress}:3000/messages`, {
-                //const response = await axios.get("http://10.0.2.2:3000/messages", {
                 params: { senderId, receiverId },
             });
+            const newMessages = response.data.map(message => {
+                let messageContent;
+                switch (message.type) {
+                    case "text":
+                        messageContent = { text: message.message };
+                        break;
+                    case "image":
+                        messageContent = { image: message.message };
+                        break;
+                    case "video":
+                        messageContent = { video: message.message };
+                        break;
+                    case "voice":
+                        messageContent = { audio: message.message };
+                        break;
+                    case "file":
+                        messageContent = { document: message.message };
+                        break;
+                    default:
+                        messageContent = { text: message.message };
+                }
 
-            setMessages(response.data);
+                return {
+                    _id: message._id,
+                    createdAt: message.timestamp,
+                    user: {
+                        _id: message.receiverId,
+                    },
+                    ...messageContent,
+                };
+            });
+            newMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages));
 
         } catch (error) {
             console.log("Error fetching the messages", error);
@@ -64,116 +138,241 @@ const chatRoom = () => {
     useEffect(() => {
         fetchMessages();
     }, []);
-    const formatTime = (time) => {
-        const options = { hour: "numeric", minute: "numeric" };
-        return new Date(time).toLocaleString("vn-VN", options);
+    const checkFirstMessage = async () => {
+        try {
+            const senderId = params?.senderId;
+            const receiverId = params?.receiverId;
+            const response = await axios.get(`http://${ipAddress}:3000/messages`, {
+                params: { senderId, receiverId },
+            });
+            return response.data.length === 0;
+        } catch (error) {
+            console.log("Error fetching the messages", error);
+            return false;
+        }
+    }
+    const onSend = useCallback(async (messages = [], senderId, receiverId, type) => {
+        setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
+        if (type === "image") {
+            const message = messages.image;
+            socket.emit("sendMessage", { senderId, receiverId, message, type });
+            const hasNoMessages = await checkFirstMessage();
+            if (hasNoMessages) {
+                handleMessaged();
+            }
+        }
+        if (type === "video") {
+            const message = messages.video;
+            socket.emit("sendMessage", { senderId, receiverId, message, type });
+            const hasNoMessages = await checkFirstMessage();
+            if (hasNoMessages) {
+                handleMessaged();
+            }
+        }
+        if (type === "voice") {
+            const message = messages.audio;
+            socket.emit("sendVoiceMessage", { senderId, receiverId, message, type });
+            const hasNoMessages = await checkFirstMessage();
+            if (hasNoMessages) {
+                handleMessaged();
+            }
+        }
+        if (type === "file") {
+            const message = messages.document;
+            socket.emit("sendMessage", { senderId, receiverId, message, type });
+            const hasNoMessages = await checkFirstMessage();
+            if (hasNoMessages) {
+                handleMessaged();
+            }
+        }
+        else {
+            const message = messages.length > 0 ? messages[messages.length - 1].text : null;
+            socket.emit("sendMessage", { senderId, receiverId, message, type });
+            const hasNoMessages = await checkFirstMessage();
+            if (hasNoMessages) {
+                handleMessaged();
+            }
+        }
+    }, []);
+    const uploadImage = async (mode) => {
+        try {
+            let result = {};
+            if (mode === "gallery") {
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
+                result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 1,
+                })
+            } else {
+                await ImagePicker.requestCameraPermissionsAsync();
+                result = await ImagePicker.launchCameraAsync({
+                    cameraType: ImagePicker.CameraType.front,
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 1,
+                });
+            }
+            if (!result.canceled) {
+                await saveImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.log("Error uploading Image: " + error)
+            setModalVisible(false)
+        }
+    }
+    const saveImage = async (imageUri) => {
+        try {
+            const messages = {
+                _id: Math.random().toString(36).substring(7),
+                image: imageUri,
+                createdAt: new Date(),
+                user: {
+                    _id: params?.receiverId,
+                },
+            };
+            onSend(messages, params?.senderId, params?.receiverId, "image")
+        } catch (error) {
+            throw error
+        }
+    }
+    const pickVideo = async () => {
+        try {
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+            const result = await VideoPicker.launchImageLibraryAsync({
+                mediaTypes: VideoPicker.MediaTypeOptions.Videos,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+
+            if (!result.canceled) {
+                const messages = {
+                    _id: Math.random().toString(36).substring(7),
+                    video: result.assets[0].uri,
+                    createdAt: new Date(),
+                    user: {
+                        _id: params?.receiverId,
+                    },
+                };
+
+                onSend(messages, params?.senderId, params?.receiverId, "video")
+            }
+        } catch (error) {
+            console.log('Error selecting video: ', error);
+        }
     };
-    
+    async function startRecording() {
+        try {
+            const perm = await Audio.requestPermissionsAsync();
+            if (perm.status === "granted") {
+                await Audio.setAudioModeAsync({
+                    allowsRecordingIOS: true,
+                    playsInSilentModeIOS: true
+                });
+                const { recording } = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+                setRecording(recording);
+            }
+        } catch (err) { }
+    }
+
+    async function stopRecording() {
+        setRecording(undefined);
+
+        await recording.stopAndUnloadAsync();
+        const { sound, status } = await recording.createNewLoadedSoundAsync();
+        const record = {
+            sound: sound,
+            duration: getDurationFormatted(status.durationMillis),
+            file: recording.getURI()
+        };
+        setVoice(record)
+        const messages = {
+            _id: Math.random().toString(36).substring(7),
+            audio: record.file,
+            createdAt: new Date(),
+            user: {
+                _id: params?.receiverId,
+            },
+        };
+        onSend(messages, params?.senderId, params?.receiverId, "voice")
+    }
+
+    function getDurationFormatted(milliseconds) {
+        const minutes = milliseconds / 1000 / 60;
+        const seconds = Math.round((minutes - Math.floor(minutes)) * 60);
+        return seconds < 10 ? `${Math.floor(minutes)}:0${seconds}` : `${Math.floor(minutes)}:${seconds}`
+    }
+    const pickDocument = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({ type: '*/*' });
+            if (result.type === 'success') {
+                console.log("OK")
+                const messages = {
+                    _id: Math.random().toString(36).substring(9),
+                    document: result.uri,
+                    createdAt: new Date(),
+                    user: {
+                        _id: params?.receiverId,
+                    },
+                };
+                onSend(messages, params?.senderId, params?.receiverId, "file");
+            }
+        } catch (error) {
+            console.log('Error picking document: ', error);
+        }
+    };
     return (
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#e2e8f1" }}>
             <View style={{ backgroundColor: '#00abf6', justifyContent: 'flex-start', alignItems: 'center', flexDirection: "row", alignItems: "center", gap: 10, height: 50 }}>
-                <Pressable onPress={()=>{router.replace('/Message')}}>
+                <TouchableOpacity onPress={() => { router.replace('/Message') }}>
                     <Ionicons name="chevron-back" size={24} color="white" />
-                </Pressable>
-                <Text style={{fontSize: 20, color: 'white'}}>{params?.uName}</Text>
-
-                
+                </TouchableOpacity>
+                <Text style={{ fontSize: 20, color: 'white' }}>{params?.uName}</Text>
             </View>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }} >
-                {messages?.map((item, index) => (
-                    <Pressable
-                        style={[
-                            item?.senderId === params?.senderId
-                                ? {
-                                    alignSelf: "flex-end",
-                                    backgroundColor: "#cff0fe",
-                                    padding: 8,
-                                    maxWidth: "60%",
-                                    borderRadius: 7,
-                                    margin: 10,
-                                }
-                                : {
-                                    alignSelf: "flex-start",
-                                    backgroundColor: "white",
-                                    padding: 8,
-                                    margin: 10,
-                                    borderRadius: 7,
-                                    maxWidth: "60%",
-                                },
-                        ]}
-                    >
-                        <Text style={{ fontSize: 18, textAlign: "left", fontWeight: "500" }}>
-                            {item?.message}
-                        </Text>
-                        <Text style={{ fontSize: 12, textAlign: "right", marginTop: 5 }}>{formatTime(item?.timestamp)}</Text>
-                    </Pressable>
-                ))}
-
-            </ScrollView>
-
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    paddingHorizontal: 10,
-                    paddingVertical: 10,
-                    borderTopWidth: 1,
-                    borderTopColor: "#dddddd",
-                    marginBottom: 1,
-                }}
-            >
-                <Entypo
-                    style={{ marginRight: 7 }}
-                    name="emoji-happy"
-                    size={24}
-                    color="gray"
-                />
-                <TextInput
-                    value={message}
-                    onChangeText={(text) => setMessage(text)}
-                    style={{
-                        flex: 1,
-                        height: 40,
-                        borderWidth: 1,
-                        borderColor: "#dddddd",
-                        borderRadius: 20,
-                        paddingHorizontal: 10,
-                    }}
-                    placeholder="Type your message..."
-                />
-
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 8,
-                        marginHorizontal: 8,
-                    }}
-                >
-                    <Entypo name="camera" size={24} color="gray" />
-
-                    <Feather name="mic" size={24} color="gray" />
-                </View>
-
-                <Pressable
-                    onPress={() => {
-                        sendMessage(params?.senderId, params?.receiverId);
-
-                    }}
-                    style={{
-                        backgroundColor: "#007bff",
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 20,
-                    }}
-                >
-                    <Text style={{ textAlign: "center", color: "white" }}>Send</Text>
-                </Pressable>
-            </View>
+            <GiftedChat
+                messages={messages}
+                onSend={messages => onSend(messages, params?.senderId, params?.receiverId, "text")}
+                user={{ _id: params?.receiverId }}
+                onInputTextChanged={setText}
+                renderSend={(props) => (
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, paddingHorizontal: 14 }}>
+                        {text.length > 0 && (
+                            <Send {...props} containerStyle={{ justifyContent: 'center' }}>
+                                <Ionicons name='send' size={28} />
+                            </Send>
+                        )}
+                        {text.length === 0 && (
+                            <>
+                                <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+                                    {recording ? <Ionicons name='mic-outline' size={28} /> : <Ionicons name='mic' size={28} />}
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={pickVideo}>
+                                    <Entypo name='folder-video' size={28} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={uploadImage}>
+                                    <Ionicons name='image-outline' size={28} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={pickDocument}>
+                                    <Ionicons name='document-attach' size={28} />
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </View>
+                )}
+                renderMessageAudio={(props) => (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: 50 }}>
+                        <TouchableOpacity onPress={() => voice.sound.replayAsync()}>
+                            <AntDesign style={{ padding: 15 }} name='play' size={28} />
+                        </TouchableOpacity>
+                    </View>
+                )}
+                //renderMessageVideo={(props) => <CustomVideoMessage {...props} />}
+            />
         </KeyboardAvoidingView>
-    )
+    );
 }
 
 export default chatRoom
 
-const styles = StyleSheet.create({})
