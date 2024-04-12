@@ -71,7 +71,7 @@ const chatRoom = () => {
     })
     const handleMessaged = async () => {
         try {
-            await axios.post(`http://${ipAddress}:3000/add-messaged`, {
+            await axios.post(`http://${ipAddress}:3000/users/add-messaged`, {
                 currentUserId: params?.senderId,
                 receiverId: params?.receiverId,
             });
@@ -100,7 +100,7 @@ const chatRoom = () => {
         try {
             const senderId = params?.senderId;
             const receiverId = params?.receiverId;
-            const response = await axios.get(`http://${ipAddress}:3000/messages`, {
+            const response = await axios.get(`http://${ipAddress}:3000/mes/messages`, {
                 params: { senderId, receiverId },
             });
             const newMessages = response.data.map(message => {
@@ -148,7 +148,7 @@ const chatRoom = () => {
         try {
             const senderId = params?.senderId;
             const receiverId = params?.receiverId;
-            const response = await axios.get(`http://${ipAddress}:3000/messages`, {
+            const response = await axios.get(`http://${ipAddress}:3000/mes/messages`, {
                 params: { senderId, receiverId },
             });
             return response.data.length === 1;
@@ -329,7 +329,7 @@ const chatRoom = () => {
     }, []);
     const onDeleteMessage = async (selectedMessage) => {
         try {
-            await axios.post(`http://${ipAddress}:3000/deleteMessage`, {
+            await axios.post(`http://${ipAddress}:3000/mes/deleteMessage`, {
                 currentUserId: params?.senderId,
                 receiverId: params?.receiverId,
                 messageId: selectedMessage._id,
@@ -345,7 +345,7 @@ const chatRoom = () => {
     };
     const onRecallMessage = async (selectedMessage) => {
         try {
-            await axios.post(`http://${ipAddress}:3000/recallMessage`, {
+            await axios.post(`http://${ipAddress}:3000/mes/recallMessage`, {
                 currentUserId: params?.senderId,
                 receiverId: params?.receiverId,
                 messageId: selectedMessage._id,

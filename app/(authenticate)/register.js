@@ -45,7 +45,7 @@ const register = () => {
             password: password,
         };
         axios
-            .post(`http://${ipAddress}:3000/register`, user)
+            .post(`http://${ipAddress}:3000/auth/register`, user)
             //.post("http://10.0.2.2:3000/register", user)
             .then((response) => {
                 console.log(response);
