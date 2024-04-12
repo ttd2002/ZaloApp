@@ -233,7 +233,9 @@ app.get("/messages", async (req, res) => {
                 { senderId: senderId, receiverId: receiverId },
                 { senderId: receiverId, receiverId: senderId },
             ],
+            deletedBy: { $ne: senderId }
         }).populate("senderId", "_id name");
+
 
         res.status(200).json(messages);
     } catch (error) {
@@ -307,6 +309,58 @@ app.put("/users/changePassword", async (req, res) => {
     }
 });
 
+app.post("/deleteMessage", async (req, res) => {
+    try {
+        const { currentUserId, receiverId, timestamp, messageId } = req.body;
+        
+        const message = await Chat.findOneAndUpdate(
+            { 
+                _id: messageId,
+                // senderId: currentUserId, 
+                // receiverId: receiverId, 
+                // timestamp: timestamp 
+            },
+            { $push: { deletedBy: currentUserId } },
+        );
 
+        if (!message) {
+            return res.status(404).json({ message: "Message not found" });
+        }
+
+        return res.sendStatus(200);
+    } catch (error) {
+        return res.status(500).json({ message: "Error deleting message", error });
+    }
+});
+
+
+app.post("/recallMessage", async (req, res) => {
+    try {
+        const { currentUserId, receiverId, timestamp, messageId } = req.body;
+        
+        const message = await Chat.findOneAndUpdate(
+            { 
+                _id: messageId,
+                // senderId: currentUserId, 
+                // receiverId: receiverId, 
+                // timestamp: timestamp 
+            },
+            { 
+                $set: { 
+                    message: "Tin nhắn đã thu hồi",
+                    type: "text",
+                } 
+            },
+        );
+
+        if (!message) {
+            return res.status(404).json({ message: "Message not found" });
+        }
+
+        return res.sendStatus(200);
+    } catch (error) {
+        return res.status(500).json({ message: "Error deleting message", error });
+    }
+});
 //routes của phone book
 app.use("/phonebook", phoneBookRoutes);

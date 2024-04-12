@@ -27,6 +27,9 @@ const chatRoom = () => {
     const router = useRouter();
     const socket = io(`http://${ipAddress}:8000`);
 
+    const [selectedMessage, setSelectedMessage] = useState(null);
+    const [showLongPressView, setShowLongPressView] = useState(false);
+
     const video = useRef(null)
     socket.on("connect", () => {
         console.log("Connected to the Socket server")
@@ -324,6 +327,43 @@ const chatRoom = () => {
             console.warn(err);
         }
     }, []);
+    const onDeleteMessage = async (selectedMessage) => {
+        try {
+            await axios.post(`http://${ipAddress}:3000/deleteMessage`, {
+                currentUserId: params?.senderId,
+                receiverId: params?.receiverId,
+                messageId: selectedMessage._id,
+                timestamp: selectedMessage.createdAt,
+            });
+            setMessages([]);
+            fetchMessages();
+            setShowLongPressView(false);
+            socket.emit("requestRender")
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+    const onRecallMessage = async (selectedMessage) => {
+        try {
+            await axios.post(`http://${ipAddress}:3000/recallMessage`, {
+                currentUserId: params?.senderId,
+                receiverId: params?.receiverId,
+                messageId: selectedMessage._id,
+                timestamp: selectedMessage.createdAt,
+            });
+            setMessages([]);
+            fetchMessages();
+            setShowLongPressView(false);
+            socket.emit("requestRender")
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+    const handleLongPress = (context, message) => {
+        setSelectedMessage(message); // Lưu message được chọn để sử dụng trong CustomLongPressView
+        setShowLongPressView(true);
+
+    };
     return (
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#e2e8f1" }}>
             <View style={{ backgroundColor: '#00abf6', justifyContent: 'flex-start', alignItems: 'center', flexDirection: "row", alignItems: "center", gap: 10, height: 50 }}>
@@ -379,8 +419,48 @@ const chatRoom = () => {
                         />
                     </>
                 )}
+                onLongPress={(context, message) => {
+
+                    console.log('Long pressed on message:', message);
+                    handleLongPress(context, message)
+                }}
 
             />
+            {showLongPressView && (
+                <View style={{ backgroundColor: 'white', position: 'absolute', bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center' }}>
+                    {selectedMessage && selectedMessage.user._id === params?.receiverId ? (
+                        <TouchableOpacity
+                            style={{
+                                width: '100%',
+                                height: 60,
+                                backgroundColor: 'white',
+                                padding: 10,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderColor: 'black',
+                                borderWidth: 1,
+                            }}
+                            onPress={() => onRecallMessage(selectedMessage)}
+                        >
+                            <Text style={{ color: 'black', fontSize: 20 }}>Thu hồi tin nhắn</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <View></View>
+                    )}
+                    <TouchableOpacity style={{ width: '100%', height: 60, backgroundColor: 'white', padding: 10, justifyContent: 'center', alignItems: 'center', borderColor: 'black', borderWidth: 1 }}
+                        onPress={() => onDeleteMessage(selectedMessage)}>
+                        <Text style={{ color: 'black', fontSize: 20 }}>Xóa tin nhắn</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ width: '100%', height: 60, backgroundColor: 'white', padding: 10, justifyContent: 'center', alignItems: 'center', borderColor: 'black', borderWidth: 1 }}
+                        onPress={() => setShowLongPressView(false)}>
+                        <Text style={{ color: 'black', fontSize: 20 }}>Chuyển tiếp</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ width: '100%', height: 60, backgroundColor: 'white', padding: 10, justifyContent: 'center', alignItems: 'center', borderColor: 'black', borderWidth: 1 }}
+                        onPress={() => setShowLongPressView(false)}>
+                        <Text style={{ color: 'black', fontSize: 20 }}>Đóng</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </KeyboardAvoidingView>
     );
 }
