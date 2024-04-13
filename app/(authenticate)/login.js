@@ -13,7 +13,7 @@ const login = () => {
           password: password,
         };
         try {
-          const response = await axios.post(`http://${ipAddress}:3000/login`, user);
+          const response = await axios.post(`http://${ipAddress}:3000/auth/login`, user);
           const token = response.data.token;
           AsyncStorage.setItem("auth", token);
           router.replace("/(tabs)/Message");

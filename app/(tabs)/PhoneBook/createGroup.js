@@ -157,7 +157,7 @@ const Contacts = ({ dataCreateGroup, setDataCreateGroup, userId }) => {
     useEffect(() => {
         const fetchFriends = async () => {
             try {
-                const response = await axios.get(`http://${ipAddress}:3000/phonebook/${userId}/friends`);
+                const response = await axios.get(`http://${ipAddress}:3000/users/${userId}/friends`);
                 const friendInitialSort = response.data.friends.sort((a, b) => {
                     const nameA = a.name?.toUpperCase();
                     const nameB = b.name?.toUpperCase();

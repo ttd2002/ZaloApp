@@ -68,7 +68,7 @@ const index = () => {
   const fetchGetUser = async () => {
     try {
       const response = await axios.get(
-        `http://${ipAddress}:3000/getUser`
+        `http://${ipAddress}:3000/users/getUser`
       );
 
       const user = response.data.user;
@@ -96,7 +96,7 @@ const index = () => {
   };
   const handleFinded = async (receiver) => {
     try {
-        await axios.post(`http://${ipAddress}:3000/add-finded`, {
+        await axios.post(`http://${ipAddress}:3000/users/add-finded`, {
 
             //await axios.post("http://10.0.2.2:3000/add-finded", {
             currentUserId: userId,
